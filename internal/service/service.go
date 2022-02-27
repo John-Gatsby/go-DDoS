@@ -2,7 +2,6 @@ package service
 
 import (
 	"fmt"
-	"log"
 	"net/http"
 	"time"
 
@@ -27,7 +26,8 @@ func (s *Service) Run() {
 	for {
 		defer func() {
 			if err := recover(); err != nil {
-				log.Println("panic occurred:", err)
+				s.tries = 0
+				s.wins = 0
 			}
 		}()
 		if s.conn < s.cfg.Conn {
@@ -47,8 +47,8 @@ func (s *Service) attack(url string) {
 		_, err := http.Get(url)
 		s.tries++
 		if err != nil {
-			s.wins++
 			s.conn--
+			s.wins++
 			return
 		}
 	}
