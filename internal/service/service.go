@@ -2,6 +2,7 @@ package service
 
 import (
 	"fmt"
+	"log"
 	"net/http"
 	"time"
 
@@ -24,6 +25,11 @@ func New(cfg *config.Config) *Service {
 func (s *Service) Run() {
 	go s.print()
 	for {
+		defer func() {
+			if err := recover(); err != nil {
+				log.Println("panic occurred:", err)
+			}
+		}()
 		if s.conn < s.cfg.Conn {
 			for _, url := range s.cfg.Urls {
 				go s.attack(url)
@@ -32,7 +38,8 @@ func (s *Service) Run() {
 		}
 	}
 
-	time.Sleep(time.Hour)
+	var ch chan int
+	<-ch
 }
 
 func (s *Service) attack(url string) {
